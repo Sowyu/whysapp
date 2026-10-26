@@ -4,7 +4,7 @@
 
 <h1 align="center">ZapFast</h1>
 
-<p align="center"><strong>WhatsApp, native and fast.</strong><br>A lightweight WhatsApp app for Linux, macOS, and Windows.</p>
+<p align="center"><strong>WhatsApp, native and fast.</strong><br>A lightweight WhatsApp app for the Mac.</p>
 
 <p align="center">
   <a href="https://zapfast.rocks/download/"><strong>Download</strong></a> ·
@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="Cargo.toml"><img src="https://img.shields.io/badge/Built_with-Rust-00a884" alt="Built with Rust"></a>
-  <a href="https://zapfast.rocks/download/"><img src="https://img.shields.io/badge/Linux_%C2%B7_macOS_%C2%B7_Windows-24292f" alt="Linux, macOS, and Windows"></a>
+  <a href="https://zapfast.rocks/download/"><img src="https://img.shields.io/badge/macOS-24292f" alt="macOS"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-00a884" alt="MIT license"></a>
 </p>
 
@@ -55,17 +55,14 @@ https://github.com/user-attachments/assets/2bf86b54-45fc-4add-8de7-c426c3cdad9b
 | **Your history** | Keep your chats in an encrypted archive on this computer, and fetch older messages from your phone as you scroll. |
 | **Several numbers** | Link more than one WhatsApp number and switch between them in one window. |
 | **Desktop controls** | Use keyboard shortcuts, select and copy text across messages, and stay linked in the tray with notifications. |
-| **Themes** | Choose light, dark, system appearance, or custom colours. On Omarchy, follow your desktop theme. |
+| **Themes** | Choose light, dark, system appearance, or custom colours. |
 | **Privacy** | Hide locked chats behind a code, or the whole window behind an app lock. Nothing goes to a server of ours. |
 
 ## Install
 
 | Platform | Installation |
 |---|---|
-| **macOS** | `brew install --cask crmne/tap/zapfast`, or [download the Mac app](https://zapfast.rocks/download/#macos). |
-| **Arch Linux** | `yay -S zapfast-bin` |
-| **Windows** | Choose your build on the [Download page](https://zapfast.rocks/download/#windows). |
-| **Other Linux** | Find Nix, AppImage, and other options on the [Download page](https://zapfast.rocks/download/#linux). |
+| **macOS** | `brew install --cask crmne/tap/zapfast`, or [download the Mac app](https://zapfast.rocks/download/). |
 | **From source** | Follow [Getting started](https://zapfast.rocks/getting-started/) for dependencies and commands. |
 
 ## Link your phone

@@ -37,9 +37,10 @@ protocol. These notes are for coding agents and new contributors.
 - The protocol comes from whatsapp-rust. Do not reimplement pieces of it
   here, and do not advertise a capability merely because a protobuf field
   for it exists.
-- Nothing ships for one platform only. A feature or theme works on Linux,
-  Windows and macOS, through each platform's own mechanism where they differ
-  and a sensible fallback where one lacks it.
+- ZapFast ships for macOS only. Linux and Windows packaging, installers and
+  CI are gone; the platform-conditional source that remains is dormant and
+  need not be extended. Design for the Mac: traffic lights, the Dock, the
+  menu bar.
 - Fewer settings. Prefer a good default to a new setting, and never add a
   setting per preference; a change that needs a new setting needs the
   maintainer's approval first.
@@ -678,8 +679,7 @@ protocol. These notes are for coding agents and new contributors.
   gesture, glide included, with the pane it began over (`ScrollRoute`, #274),
   asking `Scrolling::gliding`; the image preview pans with a touchpad and
   zooms with a wheel by `Scrolling::from_trackpad`.
-- Platform-specific code belongs behind `cfg` blocks; a change for one
-  platform must keep the other two compiling.
+- Platform-specific code belongs behind `cfg` blocks.
 
 egui pitfalls this code has already hit:
 
@@ -754,8 +754,7 @@ released, which goes out as soon as it is fixed.
 
 A release is not finished when the tag is pushed. Do these in order:
 
-1. From a clean, up-to-date `main`, bump `version` in `Cargo.toml`, add the
-   release to the `<releases>` list in the Flatpak metainfo, and update
+1. From a clean, up-to-date `main`, bump `version` in `Cargo.toml` and update
    `Cargo.lock` with a build. Write the release notes, in the style above, to
    `packaging/release-notes/vX.Y.Z.md`: the release workflow publishes that
    file as the release description, and a stable tag without it fails. Link
@@ -775,13 +774,6 @@ A release is not finished when the tag is pushed. Do these in order:
    and the Changelog link; do not add older versions to it. Never point the
    download page at files that do not exist yet. Set `release_asset_prefix` to
    `zapfast` and `release_app_name` to `ZapFast` only once those assets exist.
-5. Update the AUR packages from the templates in `packaging/arch/`. The shared
-   packaging workflow generates versions, hashes and `.SRCINFO` after the
-   release exists, and publishes when `PUBLISH_AUR` and the required secrets
-   are configured. Otherwise use `native-packages` to build, stage,
-   review and publish the generated recipes; see `PACKAGING.md`. Validate
-   native builds with `makepkg -f`. A recipe-only `zapfast-git` change does
-   not require an application release.
 
 ## Definition of done
 
