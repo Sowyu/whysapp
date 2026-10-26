@@ -138,20 +138,20 @@ fn control(command: &Control, sent: single_instance::Sent) -> (i32, Option<Strin
         (_, Sent::Taken) | (Control::Quit, Sent::NotRunning) => (0, None),
         (Control::ReloadThemes, Sent::NotRunning) => (
             1,
-            Some("ZapFast is not running, so there are no themes to reload.".to_owned()),
+            Some("WhysApp is not running, so there are no themes to reload.".to_owned()),
         ),
         (Control::ReloadThemes, Sent::Older) => (
             1,
-            Some("The running ZapFast is too old to reload themes from the command line.".to_owned()),
+            Some("The running WhysApp is too old to reload themes from the command line.".to_owned()),
         ),
         (Control::Quit, Sent::Older) => (
             1,
             Some(
-                "The running ZapFast is too old to quit from the command line; use Quit in its tray menu."
+                "The running WhysApp is too old to quit from the command line; use Quit in its tray menu."
                     .to_owned(),
             ),
         ),
-        (_, Sent::Failed(error)) => (1, Some(format!("Could not reach the running ZapFast: {error}"))),
+        (_, Sent::Failed(error)) => (1, Some(format!("Could not reach the running WhysApp: {error}"))),
     }
 }
 
@@ -233,7 +233,7 @@ fn run() -> eframe::Result<()> {
         && target.is_none()
         && invite.is_none()
     {
-        eprintln!("ZapFast cannot read a phone number or group invite link from {argument}");
+        eprintln!("WhysApp cannot read a phone number or group invite link from {argument}");
         std::process::exit(2);
     }
     let waker = backend::Waker::default();
@@ -257,12 +257,12 @@ fn run() -> eframe::Result<()> {
             single_instance::Outcome::Surfaced
                 if cli.start_hidden && target.is_none() && invite.is_none() =>
             {
-                eprintln!("ZapFast is already running");
+                eprintln!("WhysApp is already running");
                 return Ok(());
             }
             single_instance::Outcome::Surfaced => {
                 eprintln!(
-                    "ZapFast or FastsApp is already running; asked it to {}",
+                    "WhysApp or FastsApp is already running; asked it to {}",
                     if target.is_some() {
                         "open the chat"
                     } else if invite.is_some() {
@@ -275,13 +275,13 @@ fn run() -> eframe::Result<()> {
             }
             single_instance::Outcome::Outdated => {
                 eprintln!(
-                    "ZapFast is already running, but that copy is too old to open the link; \
+                    "WhysApp is already running, but that copy is too old to open the link; \
                      asked it to show its window instead. Quit it and try again to open the link."
                 );
                 return Ok(());
             }
             single_instance::Outcome::Unanswered => {
-                eprintln!("ZapFast is already running but did not answer");
+                eprintln!("WhysApp is already running but did not answer");
                 return Ok(());
             }
         }
@@ -333,7 +333,7 @@ fn run() -> eframe::Result<()> {
     // The name and icon volume mixers show for every sound ZapFast plays or records; set before
     // anything opens or lists a device.
     let _ = fastframe_audio::set_app_info(fastframe_audio::AppInfo {
-        name: "ZapFast".into(),
+        name: "WhysApp".into(),
         icon: Some("zapfast".into()),
     });
     let settings = settings::Settings::load(&dirs.settings_file());
@@ -465,7 +465,7 @@ fn run() -> eframe::Result<()> {
                 )
             });
             eframe::run_native(
-                "ZapFast",
+                "WhysApp",
                 native_options(demo_persistence.clone(), geometry, transparent),
                 Box::new(move |cc| {
                     let mut app = lease.take(&cc.egui_ctx);
@@ -519,14 +519,14 @@ fn is_graphics_failure(error: &eframe::Error) -> bool {
 #[cfg(any(windows, test))]
 fn startup_failure_text(graphics: bool, details: &str, log: &std::path::Path) -> String {
     let summary = if graphics {
-        "ZapFast could not start because the graphics driver does not offer \
-         OpenGL 2.1 or newer, which ZapFast needs to draw its window.\n\n\
+        "WhysApp could not start because the graphics driver does not offer \
+         OpenGL 2.1 or newer, which WhysApp needs to draw its window.\n\n\
          Install the current driver from the maker of the graphics chip \
          (Intel, AMD or NVIDIA). The Microsoft Basic Display Adapter, some \
          virtual machines and some remote desktop sessions offer no usable \
          OpenGL."
     } else {
-        "ZapFast could not start."
+        "WhysApp could not start."
     };
     format!(
         "{summary}\n\nDetails: {details}\n\nThe log may say more: {}",
@@ -549,7 +549,7 @@ fn startup_failure_dialog(error: &eframe::Error) {
         &paths::AppDirs::discover().log_file(),
     );
     let wide = |text: &str| text.encode_utf16().chain([0]).collect::<Vec<u16>>();
-    let (text, caption) = (wide(&text), wide("ZapFast"));
+    let (text, caption) = (wide(&text), wide("WhysApp"));
     // SAFETY: both strings are NUL-terminated and outlive the call.
     unsafe {
         MessageBoxW(
@@ -605,7 +605,7 @@ fn native_options(
     let default_size = demo_size_arg().unwrap_or([1180.0, 780.0]);
     let demo = demo_persistence.is_some();
     let viewport = egui::ViewportBuilder::default()
-        .with_title(if demo { "ZapFast Demo" } else { "ZapFast" })
+        .with_title(if demo { "WhysApp Demo" } else { "WhysApp" })
         .with_app_id(if demo {
             "zapfast-demo".to_owned()
         } else {
@@ -1088,7 +1088,7 @@ mod startup_failure_tests {
             "The directory is not writable",
             std::path::Path::new("zapfast.log"),
         );
-        assert!(text.starts_with("ZapFast could not start."));
+        assert!(text.starts_with("WhysApp could not start."));
         assert!(!text.contains("OpenGL"));
         assert!(text.contains("The directory is not writable"));
     }

@@ -19,7 +19,7 @@ Dir.mktmpdir("zapfast-dmg-") do |directory|
   created = 3.times.any? do |attempt|
     FileUtils.rm_f(output)
     sleep(5 * attempt)
-    system("hdiutil", "create", "-volname", "ZapFast", "-srcfolder", directory,
+    system("hdiutil", "create", "-volname", "WhysApp", "-srcfolder", directory,
       "-size", "#{megabytes}m", "-format", "UDZO", output)
   end
   unless created

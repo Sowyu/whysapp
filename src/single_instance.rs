@@ -274,7 +274,7 @@ fn legacy_request(mut stream: TcpStream, verb: &str) -> std::io::Result<()> {
     } else {
         Err(std::io::Error::new(
             std::io::ErrorKind::InvalidData,
-            "the port is held by something other than ZapFast",
+            "the port is held by something other than WhysApp",
         ))
     }
 }

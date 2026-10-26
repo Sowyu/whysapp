@@ -1145,15 +1145,15 @@ fn tray_config(lockable: bool) -> fastframe_tray::Config {
     use fastframe_tray::MenuItem;
     fastframe_tray::Config {
         id: "zapfast",
-        title: "ZapFast".into(),
+        title: "WhysApp".into(),
         icon: crate::util::app_icon_rgba,
         template_icon: Some(crate::util::tray_template_rgba),
         // The tray icon is the app icon, so hosts that draw only named icons
         // may use the installed one.
         themed_icon: true,
         menu: vec![
-            MenuItem::action(TRAY_SHOW, "Show or hide ZapFast"),
-            MenuItem::action(TRAY_LOCK, "Lock ZapFast").visible(lockable),
+            MenuItem::action(TRAY_SHOW, "Show or hide WhysApp"),
+            MenuItem::action(TRAY_LOCK, "Lock WhysApp").visible(lockable),
             MenuItem::Separator,
             MenuItem::action(TRAY_QUIT, "Quit"),
         ],
@@ -4231,7 +4231,7 @@ impl App {
             Event::UpdateAvailable { version, url } => {
                 let notice = crate::updates::Release { version, url };
                 if self.update.as_ref() != Some(&notice) {
-                    self.toast(format!("ZapFast {} is available", notice.version));
+                    self.toast(format!("WhysApp {} is available", notice.version));
                 }
                 self.update = Some(notice);
             }
@@ -4285,7 +4285,7 @@ impl App {
                     .into_owned(),
                     crate::calls::CALL_LINKS_OFF => crate::i18n::gettext(
                         self.locale,
-                        "ZapFast can't join group calls yet: open the link on your phone.",
+                        "WhysApp can't join group calls yet: open the link on your phone.",
                     )
                     .into_owned(),
                     _ => message,
@@ -5016,7 +5016,7 @@ impl App {
         let message = match reason {
             Refusal::Offline => crate::i18n::gettext(
                 self.locale,
-                "Not sent: ZapFast is not connected to WhatsApp.",
+                "Not sent: WhysApp is not connected to WhatsApp.",
             ),
             Refusal::QuoteUnavailable => crate::i18n::gettext(
                 self.locale,
@@ -6840,7 +6840,7 @@ impl App {
                     // own, or one that never decodes would download forever:
                     // the bubble offers the retry, as a failed download does.
                     log::warn!("a downloaded attachment could not be displayed");
-                    media.state = MediaState::Failed("ZapFast could not display this file".into());
+                    media.state = MediaState::Failed("WhysApp could not display this file".into());
                 } else if !matches!(media.state, MediaState::Downloading) {
                     // Gone from the disk: it downloads again like any
                     // attachment that was never downloaded.
@@ -7029,7 +7029,7 @@ impl App {
                     } else {
                         self.toast(crate::i18n::gettext(
                             self.locale,
-                            "ZapFast can't join group calls yet: open the link on your phone.",
+                            "WhysApp can't join group calls yet: open the link on your phone.",
                         ));
                     }
                 } else if let Some(code) = crate::safety::group_invite_code(&url) {
@@ -7042,7 +7042,7 @@ impl App {
                 } else if let Some(url) = crate::safety::external_url(&url) {
                     ctx.open_url(egui::OpenUrl::new_tab(url));
                 } else {
-                    self.toast_error("This link type cannot be opened from ZapFast");
+                    self.toast_error("This link type cannot be opened from WhysApp");
                 }
             }
             Action::CopyText(text) => {
@@ -8207,7 +8207,7 @@ impl App {
                     self.toast_error(
                         crate::i18n::gettext(
                             self.locale,
-                            "You have {limit} labels, the most ZapFast keeps.",
+                            "You have {limit} labels, the most WhysApp keeps.",
                         )
                         .replace("{limit}", &crate::archive::LABEL_LIMIT.to_string()),
                     );
@@ -9358,7 +9358,7 @@ impl App {
                 self.start_with_system = crate::autostart::switch(state);
                 if outcome.changed && matches!(state, fastframe_autostart::State::NeedsApproval(_))
                 {
-                    self.toast("Allow ZapFast in System Settings, under Login Items.");
+                    self.toast("Allow WhysApp in System Settings, under Login Items.");
                 }
             }
             Err(error) => {
@@ -15926,8 +15926,8 @@ mod tests {
             assert_eq!(
                 super::tray_config(lockable).menu,
                 [
-                    fastframe_tray::MenuItem::action(super::TRAY_SHOW, "Show or hide ZapFast"),
-                    fastframe_tray::MenuItem::action(super::TRAY_LOCK, "Lock ZapFast")
+                    fastframe_tray::MenuItem::action(super::TRAY_SHOW, "Show or hide WhysApp"),
+                    fastframe_tray::MenuItem::action(super::TRAY_LOCK, "Lock WhysApp")
                         .visible(lockable),
                     fastframe_tray::MenuItem::Separator,
                     fastframe_tray::MenuItem::action(super::TRAY_QUIT, "Quit"),
@@ -23268,7 +23268,7 @@ mod app_lock_tests {
         app.lock_app();
         app.maybe_notify(CHAT, &message);
         let shown = app.notifications.shown.last().unwrap();
-        assert_eq!(shown.title, "ZapFast");
+        assert_eq!(shown.title, "WhysApp");
         assert_eq!(shown.body, "New message");
         assert_eq!(shown.picture, None);
         assert_eq!(
@@ -23303,7 +23303,7 @@ mod app_lock_tests {
         app.settings.notification_content = false;
         app.maybe_notify(CHAT, &message);
         let shown = app.notifications.shown.last().unwrap().clone();
-        assert_eq!(shown.title, "ZapFast");
+        assert_eq!(shown.title, "WhysApp");
         assert_eq!(shown.body, "New message");
         assert_eq!(shown.picture, None);
         assert_eq!(shown.sound, app.settings.message_sound);

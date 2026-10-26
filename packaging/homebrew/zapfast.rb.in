@@ -3,7 +3,7 @@ cask "zapfast" do
   sha256 "@MACOS_SHA256@"
 
   url "https://github.com/crmne/zapfast/releases/download/v#{version}/zapfast-v#{version}-macos-universal.dmg"
-  name "ZapFast"
+  name "WhysApp"
   desc "Native WhatsApp client"
   homepage "https://zapfast.rocks"
 
@@ -12,5 +12,5 @@ cask "zapfast" do
     strategy :github_latest
   end
 
-  app "ZapFast.app"
+  app "WhysApp.app"
 end

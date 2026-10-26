@@ -5861,7 +5861,7 @@ mod tests {
             .filter_map(|(_, node)| node.label().or_else(|| node.value()))
             .collect();
         assert!(
-            !labels.contains(&"Locked chats are read-only in ZapFast"),
+            !labels.contains(&"Locked chats are read-only in WhysApp"),
             "{labels:?}"
         );
         assert!(!labels.contains(&"admins"));

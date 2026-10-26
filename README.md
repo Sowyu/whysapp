@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/images/logo.svg" alt="ZapFast logo" width="88" height="88">
+  <img src="docs/assets/images/logo.svg" alt="WhysApp logo" width="88" height="88">
 </p>
 
-<h1 align="center">ZapFast</h1>
+<h1 align="center">WhysApp</h1>
 
 <p align="center"><strong>WhatsApp, native and fast.</strong><br>A lightweight WhatsApp app for the Mac.</p>
 
