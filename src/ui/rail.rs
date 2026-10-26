@@ -34,9 +34,10 @@ const GAP: f32 = 8.0;
 const MIN_AVATARS: f32 = 64.0;
 /// Width of the line between the destinations and the chats' avatars.
 const DIVIDER: f32 = 24.0;
-/// How far below the window's top the macOS traffic lights end, centred as
-/// they are in the 60-point title bar, with a little room under them.
-const LIGHTS_CLEARANCE: f32 = theme::TOP_BAR_HEIGHT / 2.0 + 12.0;
+/// Where the rail starts below the macOS traffic lights: under the whole
+/// title bar they are centred in, so the lights and the list's title share
+/// one band across the rail and the list, as in Mail and Notes.
+const LIGHTS_CLEARANCE: f32 = theme::TOP_BAR_HEIGHT;
 
 /// Where the rail was laid out, for layout tests.
 pub(crate) fn rect_id() -> egui::Id {

@@ -21585,7 +21585,7 @@ mod rail_tests {
     /// The rail stands at the window's left edge beside the list, with Chats
     /// and Calls at its top and Starred, Settings and our avatar at its foot;
     /// with the list hidden, the chats' avatars fill it between the two. On
-    /// macOS it starts below the traffic lights.
+    /// macOS it starts below the title bar the traffic lights sit in.
     #[test]
     fn the_rail_carries_the_destinations_with_the_list_shown_or_hidden() {
         for macos in [false, true] {
@@ -21638,8 +21638,9 @@ mod rail_tests {
             // A Mac lays out its own way whichever the preview says.
             if crate::theme::macos_chrome(&ctx) {
                 assert!(
-                    top[0].top() >= 36.0 && top[0].top() < 60.0,
-                    "just below the traffic lights: {:?}",
+                    top[0].top() >= crate::theme::TOP_BAR_HEIGHT
+                        && top[0].top() < crate::theme::TOP_BAR_HEIGHT + 8.0,
+                    "just below the title bar the traffic lights sit in: {:?}",
                     top[0]
                 );
                 // The lights reach over the list header, whose title makes
