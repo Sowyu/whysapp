@@ -15,7 +15,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui, chat: &str, id: &str) {
         theme::text(
             ui,
             gettext(locale, "Message info"),
-            theme::semibold(18.0),
+            theme::semibold(16.0),
             palette.text,
         );
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {

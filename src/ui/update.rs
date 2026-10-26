@@ -36,7 +36,7 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
                 theme::text(
                     ui,
                     crate::i18n::gettext(locale, "Update ZapFast"),
-                    theme::bold(20.0),
+                    theme::semibold(17.0),
                     palette.text,
                 );
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {

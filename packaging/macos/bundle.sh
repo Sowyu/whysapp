@@ -6,7 +6,8 @@
 # Set CODESIGN_IDENTITY to use a Developer ID. Otherwise, use the ad-hoc
 # signature required on arm64.
 #
-# Generate the .icns from the committed 1024px PNG with macOS iconutil.
+# Compile the Liquid Glass icon (ZapFast.icon, made in Icon Composer) with
+# Xcode's actool, which also writes a flat .icns for macOS before 26.
 # Info.plist is next to this script.
 set -euo pipefail
 
@@ -29,15 +30,13 @@ identifier=me.paolino.fastsapp
 mkdir -p "$app/Contents/Library/LaunchAgents"
 cp "$here/autostart.plist" "$app/Contents/Library/LaunchAgents/$identifier.autostart.plist"
 
-iconset="$(mktemp -d)/zapfast.iconset"
-mkdir -p "$iconset"
-# iconutil reads these base sizes and optional @2x versions. It ignores 64x64.
-for size in 16 32 128 256 512; do
-    sips -z $size $size "$here/icon-1024.png" --out "$iconset/icon_${size}x${size}.png" >/dev/null
-    double=$((size * 2))
-    sips -z $double $double "$here/icon-1024.png" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
-done
-iconutil -c icns "$iconset" -o "$app/Contents/Resources/zapfast.icns"
+icons="$(mktemp -d)"
+xcrun actool "$here/ZapFast.icon" --compile "$app/Contents/Resources" \
+    --app-icon ZapFast --platform macosx --target-device mac \
+    --minimum-deployment-target 11.0 --enable-on-demand-resources NO \
+    --output-partial-info-plist "$icons/partial.plist" >/dev/null
+test -f "$app/Contents/Resources/Assets.car"
+test -f "$app/Contents/Resources/ZapFast.icns"
 
 # The notification plays ZapFast's built-in sounds from the bundle by name, so
 # Do Not Disturb and Focus silence them (src/notify/macos.rs).

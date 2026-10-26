@@ -791,13 +791,10 @@ impl Shell {
         {
             ctx.request_repaint_after(at.saturating_duration_since(std::time::Instant::now()));
         }
-        // The chat header is 60 points and zooms; the linking screen keeps
-        // AppKit's own 28-point strip.
-        let title_bar = if app.is_linked() && !app.app_lock.is_locked() {
-            zapfast::theme::TOP_BAR_HEIGHT
-        } else {
-            28.0 / ctx.zoom_factor()
-        };
+        // The chat list's header is 60 points and zooms; the linking screen,
+        // and a window with no list beside the content card, keep AppKit's
+        // own 28-point strip.
+        let title_bar = zapfast::ui::traffic_light_bar(app, ctx);
         fastframe_titlebar::align_traffic_lights(frame, ctx, title_bar);
         zapfast::backdrop::apply(frame, &app.palette, self.transparent);
         #[cfg(feature = "demo")]

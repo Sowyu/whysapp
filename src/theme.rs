@@ -108,29 +108,31 @@ impl Palette {
     pub fn dark() -> Self {
         Self {
             dark: true,
-            window: Color32::from_rgb(0x0b, 0x14, 0x1a),
-            panel: Color32::from_rgb(0x11, 0x1b, 0x21),
-            surface: Color32::from_rgb(0x20, 0x2c, 0x33),
-            surface_hover: Color32::from_rgb(0x2a, 0x39, 0x42),
-            surface_active: Color32::from_rgb(0x35, 0x44, 0x4d),
-            outline: Color32::from_rgb(0x22, 0x2d, 0x34),
-            text: Color32::from_rgb(0xe9, 0xed, 0xef),
+            // Neutral near-blacks: the window and chat list share one tone,
+            // the conversation sits a step lighter, as a card on it.
+            window: Color32::from_rgb(0x0a, 0x0a, 0x0b),
+            panel: Color32::from_rgb(0x0a, 0x0a, 0x0b),
+            surface: Color32::from_rgb(0x1b, 0x1b, 0x1c),
+            surface_hover: Color32::from_rgb(0x22, 0x22, 0x23),
+            surface_active: Color32::from_rgb(0x2a, 0x2a, 0x2c),
+            outline: Color32::from_rgb(0x24, 0x24, 0x26),
+            text: Color32::from_rgb(0xf5, 0xf5, 0xf5),
             // Secondary and dim text reach WCAG AA (4.5:1) on the window,
             // panel, surface, and menu colours.
-            secondary: Color32::from_rgb(0x97, 0xa5, 0xae),
-            dim: Color32::from_rgb(0x8a, 0x98, 0x9f),
-            accent: Color32::from_rgb(0x00, 0xa8, 0x84),
-            accent_hover: Color32::from_rgb(0x06, 0xcf, 0x9c),
-            on_accent: Color32::from_rgb(0x0b, 0x14, 0x1a),
-            danger: Color32::from_rgb(0xf1, 0x5c, 0x6d),
-            warning: Color32::from_rgb(0xff, 0xd2, 0x79),
-            overlay: Color32::from_rgb(0x23, 0x31, 0x38),
+            secondary: Color32::from_rgb(0xa3, 0xa3, 0xa6),
+            dim: Color32::from_rgb(0x8f, 0x8f, 0x93),
+            accent: Color32::from_rgb(0x2b, 0xa8, 0x9e),
+            accent_hover: Color32::from_rgb(0x3c, 0xbd, 0xb2),
+            on_accent: Color32::from_rgb(0x0a, 0x0a, 0x0b),
+            danger: Color32::from_rgb(0xf0, 0x6a, 0x63),
+            warning: Color32::from_rgb(0xff, 0xc5, 0x5c),
+            overlay: Color32::from_rgb(0x20, 0x20, 0x21),
             shadow: Color32::from_black_alpha(140),
-            chat: Color32::from_rgb(0x0b, 0x14, 0x1a),
-            bubble_in: Color32::from_rgb(0x20, 0x2c, 0x33),
-            bubble_out: Color32::from_rgb(0x00, 0x5c, 0x4b),
-            link: Color32::from_rgb(0x53, 0xbd, 0xeb),
-            read: Color32::from_rgb(0x53, 0xbd, 0xeb),
+            chat: Color32::from_rgb(0x13, 0x13, 0x14),
+            bubble_in: Color32::from_rgb(0x1f, 0x1f, 0x21),
+            bubble_out: Color32::from_rgb(0x18, 0x3b, 0x38),
+            link: Color32::from_rgb(0x5c, 0xc8, 0xbe),
+            read: Color32::from_rgb(0x5c, 0xc8, 0xbe),
             bubbles: BubbleStyle::WhatsApp,
         }
     }
@@ -204,50 +206,32 @@ impl Palette {
     pub fn light() -> Self {
         Self {
             dark: false,
-            window: Color32::from_rgb(0xf0, 0xf2, 0xf5),
-            panel: Color32::from_rgb(0xff, 0xff, 0xff),
-            surface: Color32::from_rgb(0xf0, 0xf2, 0xf5),
-            surface_hover: Color32::from_rgb(0xe6, 0xe9, 0xec),
-            surface_active: Color32::from_rgb(0xd9, 0xdd, 0xe1),
-            outline: Color32::from_rgb(0xe9, 0xed, 0xef),
-            text: Color32::from_rgb(0x11, 0x1b, 0x21),
+            window: Color32::from_rgb(0xec, 0xec, 0xec),
+            panel: Color32::from_rgb(0xec, 0xec, 0xec),
+            surface: Color32::from_rgb(0xe2, 0xe2, 0xe3),
+            surface_hover: Color32::from_rgb(0xdc, 0xdc, 0xdd),
+            surface_active: Color32::from_rgb(0xd3, 0xd3, 0xd5),
+            outline: Color32::from_rgb(0xdb, 0xdb, 0xdc),
+            text: Color32::from_rgb(0x1e, 0x1e, 0x1e),
             // Secondary and dim text reach WCAG AA (4.5:1) on the window,
-            // panel, surface, chat, and menu colours. The accent is the green
-            // WhatsApp uses in its light theme, readable as text on white and
-            // under white button labels.
-            secondary: Color32::from_rgb(0x51, 0x5f, 0x67),
-            dim: Color32::from_rgb(0x63, 0x6b, 0x72),
-            accent: Color32::from_rgb(0x00, 0x80, 0x69),
-            accent_hover: Color32::from_rgb(0x00, 0x6e, 0x5a),
+            // panel, surface, chat, and menu colours. The accent is a deep
+            // teal, readable as text on white and under white button labels.
+            secondary: Color32::from_rgb(0x56, 0x56, 0x58),
+            dim: Color32::from_rgb(0x5e, 0x5e, 0x61),
+            accent: Color32::from_rgb(0x06, 0x76, 0x6f),
+            accent_hover: Color32::from_rgb(0x05, 0x64, 0x5e),
             on_accent: Color32::WHITE,
-            danger: Color32::from_rgb(0xea, 0x00, 0x38),
-            warning: Color32::from_rgb(0xa0, 0x6b, 0x00),
+            danger: Color32::from_rgb(0xc7, 0x33, 0x2f),
+            warning: Color32::from_rgb(0x95, 0x5f, 0x00),
             overlay: Color32::from_rgb(0xff, 0xff, 0xff),
             shadow: Color32::from_black_alpha(LIGHT_SHADOW_ALPHA),
-            chat: Color32::from_rgb(0xef, 0xea, 0xe2),
+            chat: Color32::from_rgb(0xf9, 0xf9, 0xf9),
             bubble_in: Color32::from_rgb(0xff, 0xff, 0xff),
-            bubble_out: Color32::from_rgb(0xd9, 0xfd, 0xd3),
-            link: Color32::from_rgb(0x02, 0x7e, 0xb5),
-            // The lighter blue vanished on the green outgoing bubble.
-            read: Color32::from_rgb(0x02, 0x7e, 0xb5),
+            bubble_out: Color32::from_rgb(0xdc, 0xef, 0xec),
+            link: Color32::from_rgb(0x06, 0x6f, 0x8a),
+            read: Color32::from_rgb(0x06, 0x6f, 0x8a),
             bubbles: BubbleStyle::WhatsApp,
         }
-    }
-
-    /// The two ends of the gradient your own bubbles run through in the
-    /// Messages style, top of the view to bottom: ChatKit draws them with a
-    /// dynamic gradient (`CKUIBehavior.shouldUseDynamicGradient`, on for the
-    /// Mac). [`Palette::bubble_out`] is the top, the lighter end, against
-    /// which the text on the bubble is checked. `None` elsewhere.
-    pub fn bubble_out_gradient(&self) -> Option<(Color32, Color32)> {
-        (self.bubbles == BubbleStyle::Messages).then(|| {
-            let [_, bottom] = if self.dark {
-                MESSAGES_BLUE_DARK
-            } else {
-                MESSAGES_BLUE_LIGHT
-            };
-            (self.bubble_out, bottom)
-        })
     }
 
     /// Whether this is the Messages theme's glass: a frosted header, glass
@@ -331,6 +315,13 @@ impl Palette {
         self.vibrant_pill(self.chat)
     }
 
+    /// The faint line around cards, bubbles and fields: the text colour at
+    /// a few percent, so it reads on every surface of every palette.
+    pub fn hairline(&self) -> Color32 {
+        self.text
+            .gamma_multiply(if self.dark { 0.07 } else { 0.09 })
+    }
+
     /// The faint edge around glass.
     pub fn glass_edge(&self) -> Stroke {
         Stroke::new(1.0, self.text.gamma_multiply(0.08))
@@ -392,18 +383,11 @@ impl Palette {
         }
     }
 
-    /// The soft shadow that lifts message bubbles and date chips off the
-    /// wallpaper: two points down with a short blur, a little denser than
-    /// the palette's own shadow colour, so custom themes steer it. A shadow
-    /// alone barely darkens a dark chat; [`Palette::raised_edge`] lights
-    /// the top as well.
+    /// What lifts message bubbles and date chips off the chat: nothing, the
+    /// interface is flat.
     pub fn bubble_shadow(&self) -> egui::epaint::Shadow {
-        egui::epaint::Shadow {
-            offset: [0, 2],
-            blur: 6,
-            spread: 0,
-            color: denser(self.lift_shadow(), SHADOW_DENSITY),
-        }
+        // Flat: surfaces on the chat are told apart by a hairline instead.
+        egui::epaint::Shadow::NONE
     }
 
     /// The shadow under a surface that floats over the window for a moment:
@@ -436,17 +420,10 @@ impl Palette {
         Color32::from_rgba_unmultiplied(r, g, b, a.min(LIGHT_SHADOW_ALPHA))
     }
 
-    /// The faint light along the top edge of a raised surface of colour
-    /// `fill`. In a dark theme the fill moves a little toward the text
-    /// colour, so it follows every dark palette, mid-dark ones included; in
-    /// a light one, where the text is dark, it moves toward white instead,
-    /// which shows on tinted surfaces and vanishes on white ones.
+    /// The edge along the top of a raised surface of colour `fill`: the
+    /// fill itself, since the interface is flat.
     pub fn raised_edge(&self, fill: Color32) -> Color32 {
-        if self.dark {
-            fill.lerp_to_gamma(self.text, DARK_EDGE_TINT)
-        } else {
-            fill.lerp_to_gamma(Color32::WHITE, LIGHT_EDGE_TINT)
-        }
+        fill
     }
 
     /// Group-sender color derived from the avatar hue.
@@ -577,26 +554,13 @@ const CHAT_TINT: f32 = 0.82;
 const SIDEBAR_TINT: f32 = 0.35;
 /// How much black the rail lays over the chat list's colour in a light
 /// palette.
-const RAIL_SHADE: f32 = 0.05;
+const RAIL_SHADE: f32 = 0.0;
 /// The same in a dark palette, whose panel is already near black.
-const DARK_RAIL_SHADE: f32 = 0.22;
-/// How much denser than the palette's shadow colour a bubble's shadow is.
-const SHADOW_DENSITY: f32 = 1.04;
-/// How far a dark theme's raised edge moves from the surface toward the text.
-const DARK_EDGE_TINT: f32 = 0.128;
+const DARK_RAIL_SHADE: f32 = 0.0;
 /// The light palette's shadow opacity, the most a raised surface casts.
 const LIGHT_SHADOW_ALPHA: u8 = 50;
-/// How far a light theme's raised edge moves from the surface toward white.
-const LIGHT_EDGE_TINT: f32 = 0.48;
 /// How thick the raised edge is, in points.
 pub const RAISED_EDGE: f32 = 1.0;
-
-/// `color` with its opacity scaled by `factor`, up to opaque.
-fn denser(color: Color32, factor: f32) -> Color32 {
-    let [r, g, b, a] = color.to_srgba_unmultiplied();
-    let alpha = (f32::from(a) * factor).round().clamp(0.0, 255.0) as u8;
-    Color32::from_rgba_unmultiplied(r, g, b, alpha)
-}
 
 /// Converts HSL to color bytes for non-egui drawing.
 pub fn hsl_rgb(hue: f32, saturation: f32, lightness: f32) -> [u8; 3] {
@@ -623,6 +587,10 @@ fn hsl(hue: f32, saturation: f32, lightness: f32) -> Color32 {
 
 pub const RADIUS: u8 = 8;
 pub const RADIUS_SMALL: u8 = 4;
+/// Fields, chips and small buttons.
+pub const RADIUS_CONTROL: u8 = 6;
+/// Dialogs and other panels that float over the window.
+pub const RADIUS_PANEL: u8 = 12;
 pub const FOCUS_STROKE_WIDTH: f32 = 1.0;
 pub const ROW_HEIGHT: f32 = 68.0;
 pub const TOP_BAR_HEIGHT: f32 = 60.0;
@@ -694,7 +662,7 @@ pub fn apply(ctx: &egui::Context, palette: &Palette) {
     visuals.selection.bg_fill = palette.accent.gamma_multiply(0.35);
     visuals.selection.stroke = Stroke::new(FOCUS_STROKE_WIDTH, palette.accent);
     visuals.window_stroke = Stroke::new(1.0, palette.outline);
-    visuals.window_corner_radius = CornerRadius::same(RADIUS + 2);
+    visuals.window_corner_radius = CornerRadius::same(RADIUS_PANEL);
     visuals.menu_corner_radius = CornerRadius::same(RADIUS);
     visuals.window_shadow = palette.modal_shadow();
     visuals.popup_shadow = palette.float_shadow();
@@ -951,6 +919,7 @@ fastframe_icons::icons! {
         Play => lucide "play",
         Plus => lucide "plus",
         QrCode => "qr-code",
+        QuestionMark => "question-mark",
         Refresh => lucide "refresh-cw",
         RotateLeft => "rotate-ccw",
         RotateRight => "rotate-cw",
@@ -1069,7 +1038,7 @@ pub fn circle_button(
     }
 }
 
-/// Draws the app's mark as it ships: the lit disc and the ink bubble of
+/// Draws the app's mark as it ships: the dark tile and the white question mark of
 /// `packaging/icons/zapfast.svg`, rendered once per pixel size.
 pub fn mark(ui: &egui::Ui, center: egui::Pos2, diameter: f32) {
     let ctx = ui.ctx();
@@ -1095,19 +1064,13 @@ pub fn mark(ui: &egui::Ui, center: egui::Pos2, diameter: f32) {
 }
 
 /// Draws the logo's shape in two flat colours, for the empty conversation's
-/// faint watermark.
+/// faint watermark: the rounded tile and the question mark on it, as in
+/// `packaging/icons/zapfast.svg`.
 pub fn logo(ui: &egui::Ui, center: egui::Pos2, diameter: f32, disc: Color32, glyph: Color32) {
-    ui.painter().circle_filled(center, diameter / 2.0, disc);
-    // Match `packaging/icons/zapfast-small.svg`: the bubble sits a little
-    // right of and above the centre, where its tail balances it.
-    let icon_size = diameter * 0.674;
-    let icon_rect = egui::Rect::from_center_size(
-        center + Vec2::new(diameter * 0.009, -diameter * 0.009),
-        Vec2::splat(icon_size),
-    );
-    Icon::MessageCircle
-        .image(glyph, icon_size)
-        .paint_at(ui, icon_rect);
+    let tile = egui::Rect::from_center_size(center, Vec2::splat(diameter));
+    ui.painter()
+        .rect_filled(tile, diameter * 29.0 / 128.0, disc);
+    Icon::QuestionMark.image(glyph, diameter).paint_at(ui, tile);
 }
 
 /// A pill-shaped text button: filled for the primary action, outlined otherwise.
@@ -1127,7 +1090,7 @@ pub fn pill_button(ui: &mut egui::Ui, palette: &Palette, label: &str, primary: b
         ui,
         response.id,
         rect,
-        rect.height() / 2.0,
+        f32::from(RADIUS_CONTROL),
         if primary {
             palette.accent
         } else {
@@ -1141,7 +1104,7 @@ pub fn pill_button(ui: &mut egui::Ui, palette: &Palette, label: &str, primary: b
     let enabled = ui.is_enabled();
     if ui.is_rect_visible(rect) {
         let hovered = enabled && response.hovered();
-        let radius = rect.height() / 2.0;
+        let radius = f32::from(RADIUS_CONTROL);
         if primary {
             let fill = if hovered {
                 palette.accent_hover
@@ -1150,7 +1113,11 @@ pub fn pill_button(ui: &mut egui::Ui, palette: &Palette, label: &str, primary: b
             };
             ui.painter().rect_filled(rect, radius, fill);
         } else {
-            let stroke_color = if hovered { palette.text } else { palette.dim };
+            let stroke_color = if hovered {
+                palette.text.gamma_multiply(0.3)
+            } else {
+                palette.hairline().gamma_multiply(1.6)
+            };
             ui.painter().rect_stroke(
                 rect,
                 radius,
@@ -1188,18 +1155,19 @@ pub fn soft_button(
     response.widget_info(|| {
         egui::WidgetInfo::selected(egui::WidgetType::Button, ui.is_enabled(), active, label)
     });
-    focus_outline(ui, response.id, rect, rect.height() / 2.0);
+    focus_outline(ui, response.id, rect, f32::from(RADIUS_CONTROL));
     if ui.is_rect_visible(rect) {
         let hovered = response.hovered();
-        // Active as a selected filter chip is: a tint of the accent.
+        // Active as a selected filter chip is.
         let fill = if active {
-            palette.accent.gamma_multiply(0.18)
+            palette.surface_active
         } else if hovered {
             palette.surface_hover
         } else {
             palette.surface
         };
-        ui.painter().rect_filled(rect, rect.height() / 2.0, fill);
+        ui.painter()
+            .rect_filled(rect, f32::from(RADIUS_CONTROL), fill);
         let mut x = rect.left() + padding.x;
         if let Some(icon) = icon {
             let icon_rect = egui::Rect::from_center_size(
@@ -1578,57 +1546,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn raised_surfaces_get_a_lit_edge_and_a_denser_shadow() {
-        let preset = |name: &str| {
-            crate::theme::presets()
-                .find(|theme| theme.filename == name)
-                .unwrap()
-                .palette
-        };
-        // A mid-dark custom palette follows too.
-        let mut mid = Palette::dark();
-        mid.chat = Color32::from_rgb(0x3a, 0x3f, 0x4b);
-        mid.bubble_in = Color32::from_rgb(0x4c, 0x52, 0x60);
-        let palettes = [
-            Palette::dark(),
-            preset("Catppuccin.json"),
-            mid,
-            Palette::light(),
-            preset("Catppuccin Latte.json"),
-        ];
-        let luminance = |color: Color32| contrast(color, Color32::BLACK);
-        for palette in palettes {
-            for fill in [palette.bubble_in, palette.bubble_out, palette.panel] {
-                let edge = palette.raised_edge(fill);
-                // Lighter than the surface, or the same where it is white.
-                assert!(
-                    luminance(edge) > luminance(fill) || fill == Color32::WHITE,
-                    "{fill:?} -> {edge:?}"
-                );
-                if palette.dark {
-                    // Close to a bubble: a hint, not an outline.
-                    if fill != palette.panel {
-                        let lift = contrast(edge, palette.chat) / contrast(fill, palette.chat);
-                        assert!(lift > 1.05 && lift < 1.6, "{fill:?} -> {edge:?}: {lift}");
-                    }
-                } else {
-                    // Toward white, never toward the dark text.
-                    assert_eq!(edge, fill.lerp_to_gamma(Color32::WHITE, LIGHT_EDGE_TINT));
-                }
-            }
-            // The same lift in every theme, as heavy as the light theme's.
-            let shadow = palette.bubble_shadow();
-            assert_eq!((shadow.offset, shadow.blur), ([0, 2], 6));
-            assert_eq!(
-                shadow.color,
-                Palette::light().bubble_shadow().color,
-                "{:?}",
-                palette.shadow
-            );
-        }
-    }
-
     /// The palette decides the theme, and the desktop's rendering its text
     /// options: linear coverage in both themes on Linux, as GTK draws it.
     #[test]
@@ -1751,7 +1668,7 @@ mod tests {
             (Palette::messages(), MESSAGES_BLUE_DARK),
             (Palette::messages_light(), MESSAGES_BLUE_LIGHT),
         ] {
-            assert_eq!(palette.bubble_out_gradient(), Some((blue[0], blue[1])));
+            assert_eq!(palette.bubble_out, blue[0]);
             let inside = palette.on_bubble(true);
             let white = |c: Color32| {
                 contrast(c, palette.bubble_out)

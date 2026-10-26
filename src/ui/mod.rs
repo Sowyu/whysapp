@@ -154,13 +154,7 @@ fn main_view(app: &mut App, ui: &mut egui::Ui, list_only: bool) {
     // too little room for it and the conversation, the list and the rail
     // step aside while the panel is open. The Calls tab's history needs the
     // full list pane: only the chats collapse into the rail's avatars.
-    let full_list = app.sidebar_mode() == SidebarDisplayMode::Expanded || app.page == Page::Calls;
-    let mut list_width = chats::compact_width(ui.ctx());
-    if full_list {
-        list_width += app.settings.sidebar_width;
-    }
-    let crowded = app.info_visible()
-        && ui.available_width() - list_width < pane::INFO_MIN + pane::INFO_CONVERSATION_MIN;
+    let (full_list, crowded) = list_layout(app, ui.available_width(), ui.ctx());
     if !narrow(ui.ctx()) && !crowded {
         rail::show(app, ui, !full_list);
         if full_list {
@@ -169,30 +163,100 @@ fn main_view(app: &mut App, ui: &mut egui::Ui, list_only: bool) {
     }
     let search_overlay = pane::show(app, ui);
     let info_overlay = info::show(app, ui);
-    egui::CentralPanel::default()
-        .frame(central_frame(app))
-        .show(ui, |ui| {
-            // The top of every page drags the window, beneath its own
-            // widgets: the empty pane, Settings, and the Calls tab's start.
-            let top = ui.max_rect();
-            caption_drag(
-                ui,
-                egui::Rect::from_min_size(top.min, vec2(top.width(), theme::TOP_BAR_HEIGHT)),
-            );
-            match app.page {
-                Page::Settings => settings::show(app, ui),
-                Page::Chats => conversation::show(app, ui),
-                // The open chat stays beside the call history.
-                Page::Calls if app.current_chat().is_some() => conversation::show(app, ui),
-                Page::Calls => calls::show(app, ui),
-                Page::Wallpaper => settings::wallpaper_show(app, ui),
-            }
+    // Beside the list the page is a card inset from the window, as in a
+    // modern Mac app: its own colour, rounded, on the window's.
+    let card = !narrow(ui.ctx());
+    let mut frame = central_frame(app);
+    let inset = widgets::CARD_INSET;
+    let top = if lights_strip(app, ui.ctx()) {
+        LIGHTS_STRIP as i8
+    } else {
+        inset
+    };
+    let left = if crowded { inset } else { 0 };
+    if card {
+        let around = ui.available_rect_before_wrap();
+        ui.painter().rect_filled(around, 0.0, app.palette.sidebar());
+        titlebar_drag(
+            ui,
+            egui::Rect::from_min_size(around.min, vec2(around.width(), f32::from(top))),
+        );
+        frame = frame.outer_margin(Margin {
+            left,
+            right: inset,
+            top,
+            bottom: inset,
         });
+    }
+    let shown = egui::CentralPanel::default().frame(frame).show(ui, |ui| {
+        // The top of every page drags the window, beneath its own
+        // widgets: the empty pane, Settings, and the Calls tab's start.
+        let top = ui.max_rect();
+        caption_drag(
+            ui,
+            egui::Rect::from_min_size(top.min, vec2(top.width(), theme::TOP_BAR_HEIGHT)),
+        );
+        match app.page {
+            Page::Settings => settings::show(app, ui),
+            Page::Chats => conversation::show(app, ui),
+            // The open chat stays beside the call history.
+            Page::Calls if app.current_chat().is_some() => conversation::show(app, ui),
+            Page::Calls => calls::show(app, ui),
+            Page::Wallpaper => settings::wallpaper_show(app, ui),
+        }
+    });
+    if card {
+        let rect = shown.response.rect;
+        let rect = egui::Rect::from_min_max(
+            rect.min + vec2(f32::from(left), f32::from(top)),
+            rect.max - vec2(f32::from(inset), f32::from(inset)),
+        );
+        widgets::round_card(ui, &app.palette, rect, app.palette.sidebar());
+    }
     if let Some(region) = search_overlay {
         pane::show_overlay(app, ui.ctx(), region);
     }
     if let Some(region) = info_overlay {
         info::show_overlay(app, ui.ctx(), region);
+    }
+}
+
+/// Whether the chat list is shown in full beside the open chat or page,
+/// rather than folded into the rail, and whether the info panel crowds both
+/// out of a window `width` wide.
+fn list_layout(app: &App, width: f32, ctx: &egui::Context) -> (bool, bool) {
+    let full_list = app.sidebar_mode() == SidebarDisplayMode::Expanded || app.page == Page::Calls;
+    let mut list_width = chats::compact_width(ctx);
+    if full_list {
+        list_width += app.settings.sidebar_width;
+    }
+    let crowded =
+        app.info_visible() && width - list_width < pane::INFO_MIN + pane::INFO_CONVERSATION_MIN;
+    (full_list, crowded)
+}
+
+/// How tall the strip above the content card is where the traffic lights
+/// sit in it: AppKit's own title bar height.
+pub const LIGHTS_STRIP: f32 = 28.0;
+
+/// Whether the traffic lights sit in a strip of their own above the content
+/// card: when nothing wide enough to hold them is left of it (the chat list
+/// folded into the rail, or crowded out by the info panel). Beside the full
+/// list they sit in the list's header instead.
+pub fn lights_strip(app: &App, ctx: &egui::Context) -> bool {
+    if !theme::macos_chrome(ctx) || !app.is_linked() || app.app_lock.is_locked() || narrow(ctx) {
+        return false;
+    }
+    let (full_list, crowded) = list_layout(app, ctx.content_rect().width(), ctx);
+    !full_list || crowded
+}
+
+/// The height of the bar the traffic lights are centred on.
+pub fn traffic_light_bar(app: &App, ctx: &egui::Context) -> f32 {
+    if !app.is_linked() || app.app_lock.is_locked() || lights_strip(app, ctx) {
+        LIGHTS_STRIP / ctx.zoom_factor()
+    } else {
+        theme::TOP_BAR_HEIGHT
     }
 }
 
@@ -315,7 +379,7 @@ fn central_background(app: &App) -> egui::Color32 {
     } else if conversation {
         app.settings.wallpaper_background(&app.palette)
     } else {
-        app.palette.panel
+        app.palette.chat
     }
 }
 
@@ -928,7 +992,7 @@ mod idle_tests {
     use super::*;
 
     #[test]
-    fn settings_uses_panel_background_not_wallpaper_color() {
+    fn settings_uses_the_card_background_not_wallpaper_color() {
         let root = tempfile::tempdir().unwrap();
         let mut app = App::headless(
             crate::paths::AppDirs::under(root.path()),
@@ -938,11 +1002,11 @@ mod idle_tests {
         app.page = Page::Settings;
         app.palette = crate::theme::Palette::light();
 
-        assert_eq!(central_background(&app), app.palette.panel);
+        assert_eq!(central_background(&app), app.palette.chat);
         assert_eq!(central_frame(&app).stroke, Stroke::NONE);
 
         app.palette = crate::theme::Palette::dark();
-        assert_eq!(central_background(&app), app.palette.panel);
+        assert_eq!(central_background(&app), app.palette.chat);
         assert_eq!(central_frame(&app).stroke, Stroke::NONE);
 
         app.page = Page::Wallpaper;

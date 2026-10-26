@@ -14,7 +14,7 @@ pub fn create(app: &mut App, ui: &mut egui::Ui, chat: &str) {
         theme::text(
             ui,
             crate::i18n::gettext(locale, "Create poll"),
-            theme::bold(18.0),
+            theme::semibold(16.0),
             palette.text,
         );
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -455,7 +455,7 @@ pub fn results(app: &mut App, ui: &mut egui::Ui, chat: &str, id: &str) {
         theme::text(
             ui,
             crate::i18n::gettext(locale, "Poll results"),
-            theme::semibold(18.0),
+            theme::semibold(16.0),
             palette.text,
         );
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {

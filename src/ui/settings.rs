@@ -271,7 +271,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                         theme::text(
                             ui,
                             crate::i18n::gettext(locale, "Settings"),
-                            theme::bold(24.0),
+                            theme::semibold(20.0),
                             palette.text,
                         );
                     });
@@ -1255,7 +1255,7 @@ pub fn wallpaper_show(app: &mut App, ui: &mut egui::Ui) {
                             {
                                 app.actions.push(Action::Open(Page::Settings));
                             }
-                            theme::text(ui, "Set chat wallpaper", theme::bold(18.0), palette.text);
+                            theme::text(ui, "Set chat wallpaper", theme::semibold(16.0), palette.text);
                         },
                     );
 
@@ -1341,7 +1341,7 @@ pub fn wallpaper_show(app: &mut App, ui: &mut egui::Ui) {
                         header.center(),
                         egui::Align2::CENTER_CENTER,
                         "Wallpaper preview",
-                        theme::bold(18.0),
+                        theme::semibold(16.0),
                         palette.text,
                     );
                     let preview = Rect::from_min_size(
@@ -1583,7 +1583,7 @@ fn section(
     add_contents: impl FnOnce(&mut egui::Ui),
 ) {
     ui.add_space(12.0);
-    theme::text(ui, title, theme::bold(18.0), palette.text);
+    theme::text(ui, title, theme::semibold(16.0), palette.text);
     ui.add_space(8.0);
     Frame::new()
         .fill(theme::blend(palette.panel, palette.surface, 0.5))

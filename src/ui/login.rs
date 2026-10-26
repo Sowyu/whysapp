@@ -32,8 +32,6 @@ pub(super) fn card(
         .frame(Frame::new().fill(palette.window))
         .show(ui, |ui| {
             let rect = ui.max_rect();
-            let top = theme::blend(palette.window, palette.accent, 0.10);
-            super::widgets::paint_vertical_gradient(ui, rect, top, palette.window);
             let card_width = (460.0_f32.min(rect.width() - 24.0)).max(0.0);
             // Center the card using its previous height. Its content determines
             // the next frame's height.
@@ -51,23 +49,17 @@ pub(super) fn card(
                     .layout(Layout::top_down(Align::Center)),
             );
             let shown = Frame::new()
-                .fill(palette.panel)
-                .stroke(Stroke::new(1.0, palette.outline))
-                .corner_radius(CornerRadius::same(theme::RADIUS + 8))
+                .fill(palette.chat)
+                .stroke(Stroke::new(1.0, palette.hairline()))
+                .corner_radius(CornerRadius::same(theme::RADIUS_PANEL))
                 .inner_margin(Margin::same(32))
-                .shadow(egui::epaint::Shadow {
-                    offset: [0, 16],
-                    blur: 48,
-                    spread: 0,
-                    color: palette.shadow,
-                })
                 .show(&mut card_ui, |ui| {
                     ui.set_width((card_width - 64.0).max(0.0));
                     ui.spacing_mut().item_spacing.y = 8.0;
                     let (logo, _) = ui.allocate_exact_size(Vec2::splat(64.0), egui::Sense::hover());
                     theme::mark(ui, logo.center(), 64.0);
                     ui.add_space(4.0);
-                    theme::text(ui, "ZapFast", theme::bold(28.0), palette.text);
+                    theme::text(ui, "ZapFast", theme::semibold(24.0), palette.text);
                     theme::text(ui, tagline, theme::regular(14.5), palette.secondary);
                     ui.add_space(16.0);
                     body(app, ui);

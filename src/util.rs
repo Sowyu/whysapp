@@ -681,18 +681,14 @@ pub fn hue(seed: &str) -> f32 {
     (hash % 360) as f32
 }
 
-/// Embedded SVG app logo used across platform surfaces.
+/// Embedded SVG app logo used across the interface.
 const MARK: &[u8] = include_bytes!("../packaging/icons/zapfast.svg");
-/// The same mark without its rim and shading, which blur below this size.
-const SMALL_MARK: &[u8] = include_bytes!("../packaging/icons/zapfast-small.svg");
-const SMALL_BELOW: usize = 40;
 
 /// Rasterizes the logo to straight-alpha RGBA.
 pub fn app_icon_rgba(size: usize) -> Vec<u8> {
-    let mark = if size < SMALL_BELOW { SMALL_MARK } else { MARK };
-    match render_mark(mark, size) {
+    match render_mark(MARK, size) {
         Some(rgba) => rgba,
-        // Fall back to an accent disc if the embedded SVG cannot render.
+        // Fall back to a plain disc if the embedded SVG cannot render.
         None => plain_disc(size),
     }
 }
@@ -729,25 +725,25 @@ fn plain_disc(size: usize) -> Vec<u8> {
             let distance = ((px - center).powi(2) + (py - center).powi(2)).sqrt();
             let coverage = (radius - distance + 0.5).clamp(0.0, 1.0);
             let index = (y * size + x) * 4;
-            rgba[index] = 0;
-            rgba[index + 1] = 168;
-            rgba[index + 2] = 132;
+            rgba[index] = 31;
+            rgba[index + 1] = 31;
+            rgba[index + 2] = 32;
             rgba[index + 3] = (coverage * 255.0) as u8;
         }
     }
     rgba
 }
 
-/// Converts the logo to a monochrome macOS menu-bar template: the disc,
-/// with the bubble cut out of it.
+/// Converts the logo to a monochrome macOS menu-bar template: the white
+/// question mark alone.
 pub fn tray_template_rgba(size: usize) -> Vec<u8> {
-    // The flat mark at every size: a template has no room for shading.
-    let mut rgba = render_mark(SMALL_MARK, size).unwrap_or_else(|| plain_disc(size));
-    // The disc's green against the ink's says how much of a pixel is disc.
-    const INK: f32 = 14.0;
-    const DISC: f32 = 168.0;
+    let mut rgba = render_mark(MARK, size).unwrap_or_else(|| plain_disc(size));
+    // The glyph's white against the tile's grey says how much of a pixel
+    // is glyph.
+    const TILE: f32 = 32.0;
+    const BUBBLE: f32 = 255.0;
     for pixel in rgba.as_chunks_mut::<4>().0 {
-        let disc = ((f32::from(pixel[1]) - INK) / (DISC - INK)).clamp(0.0, 1.0);
+        let disc = ((f32::from(pixel[1]) - TILE) / (BUBBLE - TILE)).clamp(0.0, 1.0);
         pixel[3] = (f32::from(pixel[3]) * disc).round() as u8;
         pixel[0] = 0;
         pixel[1] = 0;
@@ -1138,18 +1134,18 @@ mod tests {
         assert_eq!(icon[middle + 3], 255);
     }
 
-    /// The menu-bar template is the disc with the bubble cut out: solid in
-    /// the bubble's middle, clear along its outline and outside the disc.
+    /// The menu-bar template is the question mark alone: solid in its stem
+    /// and dot, clear inside its hook and on the tile around it.
     #[test]
-    fn the_tray_template_cuts_the_bubble_out_of_the_disc() {
+    fn the_tray_template_is_the_question_mark() {
         let size = 64;
         let template = tray_template_rgba(size);
         let alpha = |x: usize, y: usize| template[(y * size + x) * 4 + 3];
-        assert_eq!(alpha(0, 0), 0);
-        assert_eq!(alpha(32, 32), 255, "inside the bubble is disc");
-        assert_eq!(alpha(32, 4), 255, "so is the rim above it");
-        let outline = (0..32).map(|y| alpha(32, y)).min().unwrap();
-        assert!(outline < 40, "the outline is cut out: {outline}");
+        assert_eq!(alpha(0, 0), 0, "the tile's corner is clear");
+        assert_eq!(alpha(10, 50), 0, "so is the tile around the glyph");
+        assert_eq!(alpha(32, 36), 255, "the stem is solid");
+        assert_eq!(alpha(32, 48), 255, "so is the dot");
+        assert!(alpha(32, 23) < 40, "the hook is open");
         assert!(
             template
                 .as_chunks::<4>()
@@ -1159,11 +1155,11 @@ mod tests {
         );
     }
 
-    /// Both marks render, the large one with its filters.
+    /// The mark renders large and at menu-bar size.
     #[test]
-    fn both_marks_render() {
+    fn the_mark_renders_at_every_size() {
         assert!(render_mark(MARK, 128).is_some());
-        assert!(render_mark(SMALL_MARK, 22).is_some());
+        assert!(render_mark(MARK, 22).is_some());
     }
 }
 

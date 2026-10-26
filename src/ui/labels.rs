@@ -221,7 +221,7 @@ pub fn manager(app: &mut App, ui: &mut egui::Ui, palette: &Palette) {
         theme::text(
             ui,
             gettext(locale, "Labels"),
-            theme::bold(18.0),
+            theme::semibold(16.0),
             palette.text,
         );
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {

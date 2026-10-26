@@ -242,11 +242,6 @@ pub fn show(app: &mut App, ui: &mut egui::Ui, hidden: bool) {
     });
     let rect = response.response.rect;
     ui.ctx().data_mut(|data| data.insert_temp(rect_id(), rect));
-    // No line between the rail and the list, whose shades tell them apart;
-    // beside the conversation the rail ends as the list does.
-    if hidden {
-        widgets::paint_edge_beside(ui, &palette, rect);
-    }
 }
 
 /// The button that brings the hidden chat list back.

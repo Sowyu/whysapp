@@ -33,8 +33,6 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
         app.settings.sidebar_width = width;
         app.actions.push(Action::SettingsChanged);
     }
-    // Separate the panel from the conversation, as the header's line does.
-    widgets::paint_edge_beside(ui, &palette, response.response.rect);
 }
 
 /// The chat list across the whole window, when the window is too narrow to
@@ -182,7 +180,7 @@ fn header(app: &mut App, ui: &mut egui::Ui) {
                         header_title(
                             ui,
                             crate::i18n::gettext(app.locale, "Starred").as_ref(),
-                            theme::bold(20.0),
+                            theme::semibold(17.0),
                             palette.text,
                             buttons_width,
                         );
@@ -210,7 +208,7 @@ fn header(app: &mut App, ui: &mut egui::Ui) {
                             } else {
                                 "Archived"
                             },
-                            theme::bold(20.0),
+                            theme::semibold(17.0),
                             palette.text,
                             buttons_width,
                         );
@@ -220,7 +218,7 @@ fn header(app: &mut App, ui: &mut egui::Ui) {
                         header_title(
                             ui,
                             &crate::i18n::gettext(app.locale, tab_title(&app.page)),
-                            theme::bold(20.0),
+                            theme::semibold(17.0),
                             palette.text,
                             buttons_width,
                         );
@@ -552,7 +550,7 @@ fn macos_header(app: &mut App, ui: &mut egui::Ui) {
                     header_title(
                         ui,
                         &crate::i18n::gettext(app.locale, tab_title(&app.page)),
-                        theme::bold(20.0),
+                        theme::semibold(17.0),
                         palette.text,
                         header_buttons_width(ui, &buttons),
                     );

@@ -14,7 +14,7 @@ pub fn send(app: &mut App, ui: &mut egui::Ui, chat: &str) {
         theme::text(
             ui,
             crate::i18n::gettext(app.locale, "Send location"),
-            theme::bold(18.0),
+            theme::semibold(16.0),
             palette.text,
         );
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {

@@ -161,7 +161,7 @@ fn interactive_list(app: &mut App, ui: &mut egui::Ui, chat: &str, message: &str,
         let heading = widgets::line(
             ui,
             label,
-            theme::semibold(18.0),
+            theme::semibold(16.0),
             palette.text,
             (ui.available_width() - 36.0).max(1.0),
             2,
@@ -865,7 +865,7 @@ pub(crate) fn forwardable(chat: &crate::model::Chat) -> bool {
 fn title(ui: &mut egui::Ui, app: &mut App, label: &str) {
     let palette = app.palette;
     ui.horizontal(|ui| {
-        theme::text(ui, label, theme::bold(18.0), palette.text);
+        theme::text(ui, label, theme::semibold(16.0), palette.text);
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             let close = theme::icon_button(
                 ui,

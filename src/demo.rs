@@ -19915,6 +19915,8 @@ mod wallpaper_tests {
     fn the_theme_wallpaper_follows_the_palette() {
         let mut app = app();
         apply_flags(&mut app, Some("theme=Nord.json"));
+        // The doodles are off by default; this checks them when chosen.
+        app.settings.show_wallpaper = true;
         let ctx = egui::Context::default();
         app.attach(&ctx);
         render(&mut app, &ctx);
@@ -19966,6 +19968,7 @@ mod wallpaper_tests {
     fn a_wallpaper_image_replaces_colour_and_doodles() {
         let mut app = app();
         apply_flags(&mut app, Some("wallpaper,wallpaper-image"));
+        app.settings.show_wallpaper = true;
         let ctx = egui::Context::default();
         app.attach(&ctx);
         let page = shapes(&mut app, &ctx);
@@ -21955,19 +21958,16 @@ mod rail_tests {
         assert!(!app.show_archived && Destination::Chats.lit(&app));
     }
 
-    /// The rail is one shade darker than the list in every palette, light,
-    /// dark and the Messages theme's.
+    /// The rail and the list are one column in one tone, light and dark:
+    /// the content card beside them is what stands apart.
     #[test]
-    fn the_rail_is_a_shade_darker_than_the_list() {
-        let luma = |color: egui::Color32| {
-            u32::from(color.r()) + u32::from(color.g()) + u32::from(color.b())
-        };
+    fn the_rail_shares_the_list_tone() {
         for palette in [
             crate::theme::Palette::light(),
             crate::theme::Palette::dark(),
         ] {
-            assert!(luma(palette.rail()) < luma(palette.sidebar()));
-            assert!(palette.rail().a() >= palette.sidebar().a());
+            assert_eq!(palette.rail(), palette.sidebar());
+            assert_ne!(palette.sidebar(), palette.chat);
         }
     }
 

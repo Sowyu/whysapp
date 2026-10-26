@@ -1062,7 +1062,7 @@ fn group_live(
                     rect.center(),
                     egui::Align2::CENTER_CENTER,
                     format!("+{rest}"),
-                    theme::bold(24.0),
+                    theme::semibold(20.0),
                     palette.secondary,
                 );
             }

@@ -109,25 +109,13 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     composer(app, ui, &chat);
     messages(app, ui, &chat, 0.0);
     // Over the messages, which scroll under the header.
-    widgets::paint_shadow_below(
+    widgets::paint_line_below(
         ui,
         &app.palette,
         header.left(),
         header.right(),
         header.bottom(),
     );
-    // The chat list, or its rail of avatars, stands at the header's level
-    // beside the conversation: it casts the same shadow across it, from
-    // under the header down. A narrow window has no list beside it.
-    if !super::narrow(ui.ctx()) {
-        widgets::paint_shadow_beside(
-            ui,
-            &app.palette,
-            header.left(),
-            header.bottom(),
-            ui.max_rect().bottom(),
-        );
-    }
 }
 
 /// Height of the pinned-message line under the header. It is one line
@@ -286,7 +274,7 @@ fn empty(app: &mut App, ui: &mut egui::Ui) {
         center,
         Align2::CENTER_CENTER,
         "ZapFast",
-        theme::bold(24.0),
+        theme::semibold(20.0),
         palette.text,
     );
     ui.painter().text(
@@ -395,6 +383,10 @@ fn glass(palette: &Palette, rect: Rect, radius: f32) -> egui::Shape {
 fn header(app: &mut App, ui: &mut egui::Ui, chat: &Chat) -> Rect {
     let palette = app.palette;
     let title = app.chat_title(chat);
+    // In the content card, which already stands its inset below the top of
+    // the window, the row starts at the card's top: level with the list's.
+    let in_card = !super::narrow(ui.ctx()) && !super::lights_strip(app, ui.ctx());
+    let top = if in_card { 8 - widgets::CARD_INSET } else { 8 };
     egui::Panel::top("chat-header")
         .show_separator_line(false)
         .frame(
@@ -404,9 +396,14 @@ fn header(app: &mut App, ui: &mut egui::Ui, chat: &Chat) -> Rect {
                 .fill(if palette.vibrant() {
                     Color32::TRANSPARENT
                 } else {
-                    palette.panel
+                    palette.chat
                 })
-                .inner_margin(Margin::symmetric(14, 8)),
+                .inner_margin(Margin {
+                    left: 14,
+                    right: 14,
+                    top,
+                    bottom: 8,
+                }),
         )
         .show(ui, |ui| {
             // The chat list, expanded or collapsed, clears the traffic lights.
@@ -421,15 +418,10 @@ fn header(app: &mut App, ui: &mut egui::Ui, chat: &Chat) -> Rect {
             let row = ui.horizontal(|ui| {
                 // Give both rows a fixed height so their contents align.
                 ui.set_min_height(HEADER_ROW);
-                // With no chat list beside it, the header clears the traffic
-                // lights itself.
+                // In a narrow window, with no card, the header clears the
+                // traffic lights itself; otherwise they sit outside the card.
                 if narrow && theme::macos_chrome(ui.ctx()) {
                     ui.add_space(theme::traffic_light_inset(ui.ctx()));
-                } else if app.sidebar_mode() == crate::model::SidebarDisplayMode::CollapsedIconsOnly
-                    && app.page == crate::model::Page::Chats
-                {
-                    // Beside the rail alone, the lights reach over this header.
-                    ui.add_space(super::rail::lights_overhang(ui.ctx()));
                 }
                 ui.add_space(room.left);
                 let picture = app.avatar(&chat.id);
@@ -1942,7 +1934,7 @@ fn composer(app: &mut App, ui: &mut egui::Ui, chat: &Chat) {
 }
 
 /// Corner radius of the composer's rounded field.
-const COMPOSER_RADIUS: u8 = 24;
+const COMPOSER_RADIUS: u8 = 12;
 /// Padding around the text of a one-line composer row. The row, and the send
 /// and record button, are one text line plus this; the controls are centred
 /// on it.

@@ -683,31 +683,21 @@ pub fn menu_separator(ui: &mut Ui, palette: &Palette) {
     );
 }
 
-/// Shows `frame` raised like a message bubble: the same soft lift shadow
-/// below it and the faint raised edge along its top, for surfaces that sit
-/// on the chat (the composer, and the strips above it).
+/// Shows `frame` as a surface on the chat (the composer, and the strips
+/// above it), edged with a hairline.
 pub fn raised<R>(
     ui: &mut Ui,
     palette: &Palette,
     frame: egui::Frame,
     add: impl FnOnce(&mut Ui) -> R,
 ) -> egui::InnerResponse<R> {
-    // Reserved before the frame paints, so the edge lies under its fill.
-    let edge_at = ui.painter().add(egui::Shape::Noop);
-    let (fill, radius) = (frame.fill, frame.corner_radius);
-    let shown = frame.shadow(palette.bubble_shadow()).show(ui, add);
-    ui.painter().set(
-        edge_at,
-        egui::Shape::rect_filled(
-            shown
-                .response
-                .rect
-                .translate(vec2(0.0, -theme::RAISED_EDGE)),
-            radius,
-            palette.raised_edge(fill),
-        ),
-    );
-    shown
+    // Flat: a hairline where the frame has no stroke of its own, no shadow.
+    let frame = if frame.stroke == Stroke::NONE {
+        frame.stroke(Stroke::new(1.0, palette.hairline()))
+    } else {
+        frame
+    };
+    frame.show(ui, add)
 }
 
 /// Shared popup-menu frame.
@@ -788,7 +778,16 @@ pub fn search_field(
         (false, true) => palette.surface_hover,
         (false, false) => palette.surface,
     };
-    ui.painter().rect_filled(rect, height / 2.0, fill);
+    let radius = f32::from(theme::RADIUS_CONTROL);
+    ui.painter().rect_filled(rect, radius, fill);
+    if !palette.vibrant() {
+        ui.painter().rect_stroke(
+            rect,
+            radius,
+            Stroke::new(1.0, palette.hairline()),
+            egui::StrokeKind::Inside,
+        );
+    }
     let icon_rect =
         Rect::from_center_size(pos2(rect.left() + 18.0, rect.center().y), Vec2::splat(16.0));
     Icon::Search
@@ -854,7 +853,7 @@ pub fn search_field(
         );
     });
     let response = output.response.response;
-    theme::focus_outline(ui, response.id, rect, height / 2.0);
+    theme::focus_outline(ui, response.id, rect, f32::from(theme::RADIUS_CONTROL));
     ui.ctx()
         .accesskit_node_builder(response.id, |node| node.set_label(hint));
     if !text.is_empty() {
@@ -1010,7 +1009,7 @@ pub fn row_highlight(ui: &Ui, palette: &Palette, rect: Rect, color: Color32) {
 /// The card `row_highlight` paints, over `card` itself: the rail's lit and
 /// hovered plates look as the selected and hovered chat rows do.
 pub fn highlight_card(ui: &Ui, palette: &Palette, card: Rect, color: Color32) {
-    let radius = CornerRadius::same(theme::RADIUS + 2);
+    let radius = CornerRadius::same(theme::RADIUS);
     // Over a vibrant window's material, a flat tint: the selected row
     // stronger than the one under the pointer.
     if palette.vibrant() {
@@ -1023,16 +1022,6 @@ pub fn highlight_card(ui: &Ui, palette: &Palette, card: Rect, color: Color32) {
             .rect_filled(card, radius, palette.tint(strength));
         return;
     }
-    // Raised like a message bubble, only more gently: the list sits on a
-    // flat panel, and a hovered row should not jump out.
-    let mut shadow = palette.bubble_shadow();
-    shadow.color = shadow.color.gamma_multiply(0.6);
-    ui.painter().add(shadow.as_shape(card, radius));
-    ui.painter().rect_filled(
-        card.translate(vec2(0.0, -theme::RAISED_EDGE)),
-        radius,
-        palette.raised_edge(color),
-    );
     ui.painter().rect_filled(card, radius, color);
 }
 
@@ -1170,64 +1159,55 @@ pub fn chip_scroll_row<R>(
     .inner
 }
 
-/// How far the shadow of a bar or panel reaches over the content beside it.
-const SHADOW_REACH: f32 = 9.0;
-
-/// A soft shadow cast downward from `edge`, for a bar that content scrolls
-/// under, beneath a hairline in the palette's outline colour. One gradient
-/// quad.
-pub fn paint_shadow_below(ui: &Ui, palette: &Palette, left: f32, right: f32, edge: f32) {
+/// The hairline along the bottom of a bar that content scrolls under.
+pub fn paint_line_below(ui: &Ui, palette: &Palette, left: f32, right: f32, edge: f32) {
     ui.painter().rect_filled(
         Rect::from_min_max(pos2(left, edge - 1.0), pos2(right, edge)),
         0.0,
-        palette.outline,
-    );
-    let rect = Rect::from_min_max(pos2(left, edge), pos2(right, edge + SHADOW_REACH));
-    ui.painter()
-        .add(shadow_mesh(palette, rect, [true, true, false, false]));
-}
-
-/// The hairline down the right edge of a panel beside content, in the
-/// palette's outline colour and inside the panel, as the one along a bar's
-/// bottom is. A stroke centred on the edge would lose the half the content
-/// beside it paints over, and all but vanish at some display scales.
-pub fn paint_edge_beside(ui: &Ui, palette: &Palette, panel: Rect) {
-    ui.painter().rect_filled(
-        Rect::from_min_max(
-            pos2(panel.right() - 1.0, panel.top()),
-            pos2(panel.right(), panel.bottom()),
-        ),
-        0.0,
-        palette.outline,
+        palette.hairline(),
     );
 }
 
-/// The same shadow cast to the right of `edge`, from `top` to `bottom`: for
-/// a panel beside content on a lower level, as the chat list is beside the
-/// conversation. The panel draws its own hairline.
-pub fn paint_shadow_beside(ui: &Ui, palette: &Palette, edge: f32, top: f32, bottom: f32) {
-    let rect = Rect::from_min_max(pos2(edge, top), pos2(edge + SHADOW_REACH, bottom));
-    ui.painter()
-        .add(shadow_mesh(palette, rect, [true, false, false, true]));
-}
+/// How far the content card stands in from the window's edges, and how
+/// round its corners are.
+pub const CARD_INSET: i8 = 8;
+pub const CARD_RADIUS: f32 = 12.0;
 
-/// One gradient quad over `rect`, dark at the corners marked in `dark`
-/// (left top, right top, right bottom, left bottom) and clear at the others.
-fn shadow_mesh(palette: &Palette, rect: Rect, dark: [bool; 4]) -> egui::Shape {
-    let shade = palette.lift_shadow().gamma_multiply(0.64);
-    let mut mesh = egui::Mesh::default();
+/// Rounds the corners of the content card `rect` after its contents are
+/// drawn: each corner outside the curve is painted over in `outside`, the
+/// colour around the card, and a hairline is drawn around it. egui clips to
+/// rectangles only, so this is how whatever the pages paint ends at the
+/// card's rounded edge.
+pub fn round_card(ui: &Ui, palette: &Palette, rect: Rect, outside: Color32) {
+    const STEPS: usize = 12;
+    let r = CARD_RADIUS;
     let corners = [
-        rect.left_top(),
-        rect.right_top(),
-        rect.right_bottom(),
-        rect.left_bottom(),
+        (rect.left_top(), vec2(1.0, 1.0)),
+        (rect.right_top(), vec2(-1.0, 1.0)),
+        (rect.right_bottom(), vec2(-1.0, -1.0)),
+        (rect.left_bottom(), vec2(1.0, -1.0)),
     ];
-    for (corner, dark) in corners.into_iter().zip(dark) {
-        mesh.colored_vertex(corner, if dark { shade } else { Color32::TRANSPARENT });
+    let mut mesh = egui::Mesh::default();
+    for (corner, inward) in corners {
+        let center = corner + inward * r;
+        let base = mesh.vertices.len() as u32;
+        mesh.colored_vertex(corner, outside);
+        for step in 0..=STEPS {
+            let angle = std::f32::consts::FRAC_PI_2 * step as f32 / STEPS as f32;
+            let point = center - vec2(inward.x * angle.cos(), inward.y * angle.sin()) * r;
+            mesh.colored_vertex(point, outside);
+        }
+        for step in 0..STEPS as u32 {
+            mesh.add_triangle(base, base + 1 + step, base + 2 + step);
+        }
     }
-    mesh.add_triangle(0, 1, 2);
-    mesh.add_triangle(0, 2, 3);
-    egui::Shape::mesh(mesh)
+    ui.painter().add(egui::Shape::mesh(mesh));
+    ui.painter().rect_stroke(
+        rect,
+        CornerRadius::same(CARD_RADIUS as u8),
+        Stroke::new(1.0, palette.hairline()),
+        egui::StrokeKind::Inside,
+    );
 }
 
 /// The side a message bubble's tail points to.
@@ -1238,17 +1218,16 @@ pub enum Side {
 }
 
 /// Corner radius of a message bubble.
-pub const BUBBLE_RADIUS: u8 = 10;
+pub const BUBBLE_RADIUS: u8 = 8;
 /// How far a bubble's tail reaches out from its side, and down from its top.
 pub const TAIL_WIDTH: f32 = 8.0;
-const TAIL_HEIGHT: f32 = 11.0;
 
 /// The corners of a message bubble: the one its tail leaves is square.
 pub fn bubble_corners(tail: Option<Side>) -> CornerRadius {
     let mut corners = CornerRadius::same(BUBBLE_RADIUS);
     match tail {
-        Some(Side::Left) => corners.nw = 0,
-        Some(Side::Right) => corners.ne = 0,
+        Some(Side::Left) => corners.nw = 3,
+        Some(Side::Right) => corners.ne = 3,
         None => {}
     }
     corners
@@ -1270,71 +1249,22 @@ pub fn bubble_shape(
     screen: egui::Rangef,
 ) -> egui::Shape {
     if palette.bubbles == theme::BubbleStyle::Messages {
-        // Your own balloons run from the palette's colour at the top of the
-        // view to a deeper one at its bottom, as ChatKit's dynamic gradient
-        // does; incoming ones are flat.
-        let gradient = palette
-            .bubble_out_gradient()
-            .filter(|_| fill == palette.bubble_out);
-        let color = |point: egui::Pos2| match gradient {
-            Some((top, bottom)) if screen.span() > 0.0 => top.lerp_to_gamma(
-                bottom,
-                ((point.y - screen.min) / screen.span()).clamp(0.0, 1.0),
-            ),
-            _ => fill,
-        };
+        let _ = screen;
+        let color = |_: egui::Pos2| fill;
         let outline = messages_balloon(rect, tail, MESSAGES_SCALE);
         return egui::Shape::mesh(fill_outline(&outline, color, 1.0 / pixels_per_point));
     }
+    // Flat, with a hairline instead of a shadow and no tail: the first
+    // message of a run only squares off its top corner toward the sender a
+    // little, which is enough to group a run.
     let corners = bubble_corners(tail);
-    let shadow = palette.bubble_shadow();
-    let mut shapes = vec![egui::Shape::Rect(shadow.as_shape(rect, corners))];
-    // The tail overlaps the bubble by a few points so no seam shows where
-    // the two anti-aliased edges meet.
-    let tail_points = tail.map(|side| {
-        let (edge, out, into): (f32, f32, f32) = match side {
-            Side::Left => (rect.left(), -TAIL_WIDTH, 3.0),
-            Side::Right => (rect.right(), TAIL_WIDTH, -3.0),
-        };
-        let top = rect.top();
-        let reach = TAIL_HEIGHT * (TAIL_WIDTH + into.abs()) / TAIL_WIDTH;
-        let mut points = vec![
-            pos2(edge + into, top),
-            pos2(edge + into, top + reach),
-            pos2(edge + out, top),
-        ];
-        // Clockwise winding either way.
-        if side == Side::Right {
-            points.reverse();
-        }
-        points
-    });
-    if let Some(points) = &tail_points {
-        let offset = vec2(shadow.offset[0].into(), shadow.offset[1].into());
-        let points: Vec<_> = points.iter().map(|point| *point + offset).collect();
-        shapes.push(soft_triangle(&points, shadow.color, shadow.blur.into()));
-    }
-    // The raised edge: the same outline a hair higher, under the fill, so
-    // only its top shows, thinning out down the rounded corners.
-    let edge = palette.raised_edge(fill);
-    let lift = vec2(0.0, -theme::RAISED_EDGE);
-    shapes.push(egui::Shape::rect_filled(
-        rect.translate(lift),
+    egui::Shape::Rect(egui::epaint::RectShape::new(
+        rect,
         corners,
-        edge,
-    ));
-    if let Some(points) = &tail_points {
-        shapes.push(egui::Shape::convex_polygon(
-            points.iter().map(|point| *point + lift).collect(),
-            edge,
-            Stroke::NONE,
-        ));
-    }
-    shapes.push(egui::Shape::rect_filled(rect, corners, fill));
-    if let Some(points) = tail_points {
-        shapes.push(egui::Shape::convex_polygon(points, fill, Stroke::NONE));
-    }
-    egui::Shape::Vec(shapes)
+        fill,
+        Stroke::new(1.0, palette.hairline()),
+        egui::StrokeKind::Inside,
+    ))
 }
 
 /// The text size Messages lays its balloons out for on the Mac: ChatKit's
@@ -1681,32 +1611,6 @@ fn ear_clip(points: &[egui::Pos2], winding: f32) -> Vec<[u32; 3]> {
     triangles
 }
 
-/// A triangle in `color` that fades out over `blur` points around its
-/// edges, like the blurred shadow of the bubble it belongs to: a sharp one
-/// showed as a grey wedge beneath the tail's tip. Six vertices.
-fn soft_triangle(points: &[egui::Pos2], color: Color32, blur: f32) -> egui::Shape {
-    let centre = (points
-        .iter()
-        .fold(Vec2::ZERO, |sum, point| sum + point.to_vec2())
-        / points.len() as f32)
-        .to_pos2();
-    let mut mesh = egui::Mesh::default();
-    for point in points {
-        let out = (*point - centre).normalized();
-        mesh.colored_vertex(*point - out * blur / 4.0, color);
-        mesh.colored_vertex(*point + out * blur / 2.0, Color32::TRANSPARENT);
-    }
-    let count = points.len() as u32;
-    // Inner vertices are even, their faded partners odd.
-    mesh.add_triangle(0, 2, 4);
-    for index in 0..count {
-        let next = (index + 1) % count;
-        mesh.add_triangle(2 * index, 2 * index + 1, 2 * next + 1);
-        mesh.add_triangle(2 * index, 2 * next + 1, 2 * next);
-    }
-    egui::Shape::mesh(mesh)
-}
-
 /// Small pill label used for date separators and pinned markers.
 pub fn chip(ui: &mut Ui, palette: &Palette, label: &str) -> egui::Response {
     let galley =
@@ -1715,7 +1619,7 @@ pub fn chip(ui: &mut Ui, palette: &Palette, label: &str) -> egui::Response {
     let size = galley.size() + vec2(20.0, 10.0);
     let (rect, response) = ui.allocate_exact_size(size, Sense::hover());
     if ui.is_rect_visible(rect) {
-        let radius = CornerRadius::from(rect.height() / 2.0);
+        let radius = CornerRadius::same(theme::RADIUS_CONTROL);
         if palette.vibrant() {
             // Glass over a vibrant conversation, as the header's.
             ui.painter().rect_filled(rect, radius, palette.glass());
@@ -1735,14 +1639,13 @@ pub fn chip(ui: &mut Ui, palette: &Palette, label: &str) -> egui::Response {
         } else {
             palette.panel
         };
-        ui.painter()
-            .add(palette.bubble_shadow().as_shape(rect, radius));
-        ui.painter().rect_filled(
-            rect.translate(vec2(0.0, -theme::RAISED_EDGE)),
-            radius,
-            palette.raised_edge(fill),
-        );
         ui.painter().rect_filled(rect, radius, fill);
+        ui.painter().rect_stroke(
+            rect,
+            radius,
+            Stroke::new(1.0, palette.hairline()),
+            egui::StrokeKind::Inside,
+        );
         ui.painter().galley(
             rect.center() - galley.size() / 2.0,
             galley,
@@ -1774,7 +1677,7 @@ pub fn dotted_chip(
     selected: bool,
 ) -> egui::Response {
     let color = if selected {
-        palette.accent
+        palette.text
     } else {
         palette.secondary
     };
@@ -1788,12 +1691,12 @@ pub fn dotted_chip(
         dot_width + text.size().x + number.as_ref().map_or(0.0, |number| gap + number.size().x);
     let (rect, response) = ui.allocate_exact_size(vec2(width + 18.0, 28.0), Sense::click());
     theme::reveal_focus(&response);
-    theme::focus_outline(ui, response.id, rect, rect.height() / 2.0);
+    theme::focus_outline(ui, response.id, rect, f32::from(theme::RADIUS_CONTROL));
     if ui.is_rect_visible(rect) {
-        let radius = rect.height() / 2.0;
+        let radius = f32::from(theme::RADIUS_CONTROL);
         if selected {
             ui.painter()
-                .rect_filled(rect, radius, palette.accent.gamma_multiply(0.18));
+                .rect_filled(rect, radius, palette.surface_active);
         } else {
             let (hover, edge) = if palette.vibrant() {
                 (
@@ -1801,7 +1704,7 @@ pub fn dotted_chip(
                     palette.tint(theme::TINT_SELECTED + theme::TINT_HOVER),
                 )
             } else {
-                (palette.surface, palette.surface_active)
+                (palette.surface, palette.hairline())
             };
             if response.hovered() {
                 ui.painter().rect_filled(rect, radius, hover);
@@ -1989,44 +1892,48 @@ mod tests {
         );
     }
 
-    /// The header's shadow and the chat list's are one shadow turned a
-    /// quarter: as dark at the edge casting it, clear as far into the content.
+    /// The content card's corners are painted over in the colour around it,
+    /// out to the curve and no further, under a hairline around the card.
     #[test]
-    fn a_panel_casts_beside_it_the_shadow_a_bar_casts_below() {
+    fn the_content_card_rounds_its_corners_in_the_colour_around_it() {
         let palette = Palette::dark();
-        let mesh = |shape: egui::Shape| match shape {
-            egui::Shape::Mesh(mesh) => mesh,
-            other => panic!("not a mesh: {other:?}"),
-        };
-        let below = mesh(shadow_mesh(
-            &palette,
-            Rect::from_min_max(pos2(100.0, 50.0), pos2(400.0, 50.0 + SHADOW_REACH)),
-            [true, true, false, false],
-        ));
-        let beside = mesh(shadow_mesh(
-            &palette,
-            Rect::from_min_max(pos2(100.0, 50.0), pos2(100.0 + SHADOW_REACH, 300.0)),
-            [true, false, false, true],
-        ));
-        let shade = palette.lift_shadow().gamma_multiply(0.64);
-        assert_ne!(shade, Color32::TRANSPARENT);
-        for vertex in &below.vertices {
-            let at_edge = vertex.pos.y == 50.0;
-            assert_eq!(vertex.color == shade, at_edge, "{:?}", vertex.pos);
-            assert!(at_edge || vertex.color == Color32::TRANSPARENT);
+        let ctx = egui::Context::default();
+        let card = Rect::from_min_max(pos2(100.0, 50.0), pos2(500.0, 400.0));
+        let outside = palette.sidebar();
+        let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
+            round_card(ui, &palette, card, outside);
+        });
+        output.textures_delta.clear();
+        let mut mesh = None;
+        let mut outline = None;
+        for clipped in &output.shapes {
+            match &clipped.shape {
+                egui::Shape::Mesh(m) => mesh = Some(m.clone()),
+                egui::Shape::Rect(r) => outline = Some(r.clone()),
+                _ => {}
+            }
         }
-        for vertex in &beside.vertices {
-            let at_edge = vertex.pos.x == 100.0;
-            assert_eq!(vertex.color == shade, at_edge, "{:?}", vertex.pos);
-            assert!(at_edge || vertex.color == Color32::TRANSPARENT);
+        let mesh = mesh.expect("the corners are painted");
+        assert!(mesh.vertices.iter().all(|v| v.color == outside));
+        // Every point lies within one radius of a corner, inside the card.
+        for vertex in &mesh.vertices {
+            assert!(card.expand(0.01).contains(vertex.pos), "{:?}", vertex.pos);
+            let near = [
+                card.left_top(),
+                card.right_top(),
+                card.right_bottom(),
+                card.left_bottom(),
+            ]
+            .iter()
+            .any(|corner| {
+                (vertex.pos.x - corner.x).abs() <= CARD_RADIUS + 0.01
+                    && (vertex.pos.y - corner.y).abs() <= CARD_RADIUS + 0.01
+            });
+            assert!(near, "{:?} is away from the corners", vertex.pos);
         }
-        // Both reach equally far from their edge.
-        let reach = |mesh: &egui::Mesh, along: fn(&egui::epaint::Vertex) -> f32| {
-            let values: Vec<f32> = mesh.vertices.iter().map(along).collect();
-            values.iter().cloned().fold(f32::MIN, f32::max)
-                - values.iter().cloned().fold(f32::MAX, f32::min)
-        };
-        assert_eq!(reach(&below, |v| v.pos.y), reach(&beside, |v| v.pos.x));
+        let outline = outline.expect("the card is outlined");
+        assert_eq!(outline.rect, card);
+        assert_eq!(outline.stroke.color, palette.hairline());
     }
 
     /// Sent shows one tick and delivered or read two, drawn from our own
@@ -2112,118 +2019,29 @@ mod tests {
     }
 
     #[test]
-    fn a_raised_frame_draws_its_edge_under_its_fill() {
-        let palette = Palette::dark();
-        let ctx = egui::Context::default();
-        let mut rect = Rect::NOTHING;
-        let mut output = ctx.run_ui(egui::RawInput::default(), |ui| {
-            rect = raised(
-                ui,
-                &palette,
-                egui::Frame::new().fill(palette.surface).inner_margin(8),
-                |ui| ui.label("x"),
-            )
-            .response
-            .rect;
-        });
-        output.textures_delta.clear();
-        // In paint order, looking inside grouped shapes (a frame groups its
-        // shadow with its fill).
-        let mut fills: Vec<(Rect, Color32)> = Vec::new();
-        let mut pending: Vec<&egui::Shape> = output
-            .shapes
-            .iter()
-            .rev()
-            .map(|clipped| &clipped.shape)
-            .collect();
-        while let Some(shape) = pending.pop() {
-            match shape {
-                egui::Shape::Vec(shapes) => pending.extend(shapes.iter().rev()),
-                egui::Shape::Rect(shape) => fills.push((shape.rect, shape.fill)),
-                _ => {}
-            }
-        }
-        let edge = fills
-            .iter()
-            .position(|(at, fill)| {
-                *at == rect.translate(vec2(0.0, -theme::RAISED_EDGE))
-                    && *fill == palette.raised_edge(palette.surface)
-            })
-            .expect("the edge is drawn");
-        let body = fills
-            .iter()
-            .position(|(at, fill)| *at == rect && *fill == palette.surface)
-            .expect("the frame is drawn");
-        assert!(edge < body, "the edge lies under the fill");
-    }
-
-    #[test]
-    fn a_tail_squares_its_corner_and_points_toward_the_sender() {
+    fn the_first_bubble_of_a_run_squares_its_corner_toward_the_sender() {
         assert_eq!(bubble_corners(None), CornerRadius::same(BUBBLE_RADIUS));
         let left = bubble_corners(Some(Side::Left));
-        assert_eq!((left.nw, left.ne), (0, BUBBLE_RADIUS));
+        assert!(left.nw < left.ne);
         let right = bubble_corners(Some(Side::Right));
-        assert_eq!((right.nw, right.ne), (BUBBLE_RADIUS, 0));
-
+        assert!(right.ne < right.nw);
+        // Flat, a single rounded rectangle with a hairline and no tail.
         let rect = Rect::from_min_size(pos2(100.0, 50.0), vec2(200.0, 40.0));
         let palette = Palette::light();
-        for (side, outside) in [(Side::Left, 92.0), (Side::Right, 308.0)] {
-            let egui::Shape::Vec(shapes) =
-                bubble_shape(&palette, rect, palette.bubble_out, Some(side), 2.0, SCREEN)
-            else {
-                panic!("a bubble is a list of shapes");
-            };
-            // The tail's tip reaches out of the bubble at its top edge. The
-            // tail is the last filled triangle, over its shadow and edge.
-            let tip = shapes
-                .iter()
-                .rev()
-                .find_map(|shape| match shape {
-                    egui::Shape::Path(path) if path.fill == palette.bubble_out => Some(path),
-                    _ => None,
-                })
-                .into_iter()
-                .flat_map(|path| path.points.iter())
-                .find(|point| !rect.contains(**point));
-            assert_eq!(tip.copied(), Some(pos2(outside, rect.top())));
-        }
-        // Later messages of a run draw no tail.
-        let egui::Shape::Vec(shapes) =
-            bubble_shape(&palette, rect, palette.bubble_in, None, 2.0, SCREEN)
-        else {
-            panic!("a bubble is a list of shapes");
+        let egui::Shape::Rect(shape) = bubble_shape(
+            &palette,
+            rect,
+            palette.bubble_out,
+            Some(Side::Left),
+            2.0,
+            SCREEN,
+        ) else {
+            panic!("a bubble is one rectangle");
         };
-        assert!(
-            !shapes
-                .iter()
-                .any(|shape| matches!(shape, egui::Shape::Path(_)))
-        );
+        assert_eq!(shape.rect, rect);
+        assert_eq!(shape.fill, palette.bubble_out);
+        assert!(shape.stroke.width > 0.0);
     }
-
-    /// WhatsApp's bubbles are drawn exactly as before the Messages balloon
-    /// was rebuilt: every shape, point and colour of a tailed and a tailless
-    /// bubble, in both palettes, hashes to the value recorded then.
-    #[test]
-    fn whatsapp_bubbles_are_unchanged() {
-        let rect = Rect::from_min_size(pos2(100.5, 50.25), vec2(213.75, 41.5));
-        // FNV-1a, stable across toolchains, over every shape's debug text.
-        let mut fingerprint: u64 = 0xcbf2_9ce4_8422_2325;
-        for palette in [Palette::dark(), Palette::light()] {
-            for tail in [None, Some(Side::Left), Some(Side::Right)] {
-                for (fill, ppp) in [(palette.bubble_out, 1.0), (palette.bubble_in, 1.5)] {
-                    let shape = bubble_shape(&palette, rect, fill, tail, ppp, SCREEN);
-                    for byte in format!("{shape:?}").bytes() {
-                        fingerprint = (fingerprint ^ u64::from(byte)).wrapping_mul(0x100_0000_01b3);
-                    }
-                }
-            }
-        }
-        println!("whatsapp bubble fingerprint {fingerprint:#x}");
-        assert_eq!(fingerprint, WHATSAPP_BUBBLES);
-    }
-
-    /// The fingerprint [`whatsapp_bubbles_are_unchanged`] recorded.
-    const WHATSAPP_BUBBLES: u64 = 0x179b_3424_7615_2b9a;
 
     /// Every shape-checking test below draws into this view.
     const SCREEN: egui::Rangef = egui::Rangef {
@@ -2489,36 +2307,6 @@ mod tests {
                 assert!(mesh.indices[strip..].iter().all(|index| index % 2 == 0));
             }
         }
-    }
-
-    /// Your own balloons shade from the palette's colour at the top of the
-    /// view to Messages' deeper one at its bottom; others' stay flat, and
-    /// WhatsApp's palettes have no gradient.
-    #[test]
-    fn messages_own_balloons_shade_down_the_view() {
-        for palette in [Palette::messages(), Palette::messages_light()] {
-            let (top, bottom) = palette.bubble_out_gradient().expect("a gradient");
-            assert_eq!(top, palette.bubble_out);
-            let at = |y: f32| Rect::from_min_size(pos2(100.0, y), vec2(200.0, 34.0));
-            let colour = |rect: Rect, fill: Color32| {
-                let egui::Shape::Mesh(mesh) =
-                    bubble_shape(&palette, rect, fill, Some(Side::Right), 2.0, SCREEN)
-                else {
-                    panic!("a Messages balloon is one mesh");
-                };
-                mesh.vertices[0].color
-            };
-            let high = colour(at(0.0), palette.bubble_out);
-            let low = colour(at(SCREEN.max - 34.0), palette.bubble_out);
-            assert_eq!(colour(at(-200.0), palette.bubble_out), top);
-            assert!(high != low && low != top);
-            let lum = |c: Color32| u32::from(c.r()) + u32::from(c.g()) + u32::from(c.b());
-            assert!(lum(low) < lum(high), "deeper toward the bottom");
-            assert_eq!(colour(at(SCREEN.max + 200.0), palette.bubble_out), bottom);
-            assert_eq!(colour(at(400.0), palette.bubble_in), palette.bubble_in);
-        }
-        assert_eq!(Palette::dark().bubble_out_gradient(), None);
-        assert_eq!(Palette::light().bubble_out_gradient(), None);
     }
 
     /// The knob radius and the track outline a switch paints in one state.

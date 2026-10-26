@@ -456,7 +456,9 @@ pub struct Settings {
     /// Download attachments when they enter view instead of on click.
     #[serde(alias = "auto_download_images")]
     pub auto_download: bool,
-    /// Show the default doodle wallpaper behind conversations.
+    /// Show the doodle wallpaper behind conversations. Off by default, and
+    /// saved under a new name so the old default of on does not carry over.
+    #[serde(rename = "show_doodles")]
     pub show_wallpaper: bool,
     /// Colour selected in the wallpaper picker.
     pub wallpaper_color: WallpaperColor,
@@ -568,7 +570,7 @@ impl Default for Settings {
             send_read_receipts: true,
             send_typing: true,
             auto_download: true,
-            show_wallpaper: true,
+            show_wallpaper: false,
             wallpaper_color: WallpaperColor::Theme,
             dark_wallpaper_color: WallpaperColor::Theme,
             wallpaper_image: None,
@@ -1082,7 +1084,7 @@ mod tests {
         assert!(parsed.enter_sends);
         assert!(parsed.check_for_updates);
         assert!(!parsed.download_updates_automatically);
-        assert!(parsed.show_wallpaper);
+        assert!(!parsed.show_wallpaper);
         assert_eq!(parsed.wallpaper_color, WallpaperColor::Theme);
         assert!(parsed.pause_other_media);
         assert_eq!(parsed.window_width, None);
